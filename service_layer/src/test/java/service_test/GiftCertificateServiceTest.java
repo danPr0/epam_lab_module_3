@@ -29,7 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(
-        classes = {GiftCertificateServiceImpl.class, GiftCertificateRepositoryImpl.class})
+        classes = {GiftCertificateServiceImpl.class})
 public class GiftCertificateServiceTest extends Mockito {
 
     @Autowired

@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {UserServiceImpl.class, UserRepositoryImpl.class})
+@SpringBootTest(classes = {UserServiceImpl.class})
 public class UserServiceTest extends Mockito {
 
     @Autowired

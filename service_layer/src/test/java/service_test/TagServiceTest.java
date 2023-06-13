@@ -17,7 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {TagServiceImpl.class, TagRepositoryImpl.class})
+@SpringBootTest(classes = {TagServiceImpl.class})
 public class TagServiceTest extends Mockito {
 
     @Autowired

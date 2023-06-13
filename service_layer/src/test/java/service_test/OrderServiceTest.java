@@ -22,7 +22,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = {OrderServiceImpl.class, OrderRepositoryImpl.class})
+@SpringBootTest(classes = {OrderServiceImpl.class})
 public class OrderServiceTest extends Mockito {
 
     @Autowired
