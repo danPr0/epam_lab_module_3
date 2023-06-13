@@ -7,9 +7,7 @@ import com.epam.esm.entity.User;
 import com.epam.esm.repository.GiftCertificateRepository;
 import com.epam.esm.repository.OrderRepository;
 import com.epam.esm.repository.UserRepository;
-import com.epam.esm.repository_impl.GiftCertificateRepositoryImpl;
 import com.epam.esm.repository_impl.OrderRepositoryImpl;
-import com.epam.esm.repository_impl.UserRepositoryImpl;
 import com.epam.esm.service.OrderService;
 import com.epam.esm.service_impl.OrderServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -18,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +59,7 @@ public class OrderServiceTest extends Mockito {
     }
 
     @Test
-    public void testAddOrder() {
+    public void testAddOrderSuccess() {
 
         when(userRepository.getEntity(user1.getId())).thenReturn(Optional.of(user1));
         when(gcRepository.getEntity(gc1.getId())).thenReturn(Optional.of(gc1));
@@ -74,16 +69,28 @@ public class OrderServiceTest extends Mockito {
         assertTrue(orderService.addOrder(user1.getId(), gc1.getId()));
         assertFalse(gc1.isActive());
         verify(gcRepository).updateEntity(gc1);
+    }
+
+    @Test
+    public void testAddOrderFailOnEmptyUser() {
 
         when(userRepository.getEntity(user1.getId())).thenReturn(Optional.empty());
         when(gcRepository.getEntity(gc2.getId())).thenReturn(Optional.of(gc2));
 
         assertFalse(orderService.addOrder(user1.getId(), gc2.getId()));
+    }
+
+    @Test
+    public void testAddOrderFailOnEmptyGiftCertificate() {
 
         when(userRepository.getEntity(user1.getId())).thenReturn(Optional.of(user1));
         when(gcRepository.getEntity(gc2.getId())).thenReturn(Optional.empty());
 
         assertFalse(orderService.addOrder(user1.getId(), gc2.getId()));
+    }
+
+    @Test
+    public void testAddOrderFailOnNotActiveGiftCertificate() {
 
         when(userRepository.getEntity(user1.getId())).thenReturn(Optional.of(user1));
         gc2.setActive(false);

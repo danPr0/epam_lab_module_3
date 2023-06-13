@@ -10,6 +10,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Map;
+
 /**
  * Controller class responsible for globally handling server exceptions.
  *
@@ -27,7 +29,8 @@ public class ExceptionController {
 
         logger.error(ex);
 
-        return ResponseEntity.badRequest().body("Cannot process the request : " + ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(Map.of("errorMessage", "Cannot process the request.", "errorCode", "400"));
     }
 
     @ExceptionHandler(value = {Exception.class})
@@ -35,6 +38,7 @@ public class ExceptionController {
 
         logger.error(ex);
 
-        return ResponseEntity.badRequest().body("Something went wrong. Please try again.");
+        return ResponseEntity.badRequest()
+                .body(Map.of("errorMessage", "Something went wrong. Please try again.", "errorCode", "400"));
     }
 }
