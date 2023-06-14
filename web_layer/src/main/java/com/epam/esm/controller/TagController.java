@@ -50,17 +50,17 @@ public class TagController {
     }
 
     @GetMapping("/most-popular-tag")
-    public ResponseEntity<Object> getMostPopularUserTag(@RequestParam Long userId) {
+    public ResponseEntity<Object> getMostPopularUserTag() {
 
-        Optional<TagDTO> tag = tagService.getMostPopularUserTag(userId);
+        Optional<TagDTO> tag = tagService.getMostPopularUserTag();
 
         if (tag.isPresent()) {
-            tag.get().add(linkTo(methodOn(TagController.class).getMostPopularUserTag(userId)).withSelfRel());
+            tag.get().add(linkTo(methodOn(TagController.class).getMostPopularUserTag()).withSelfRel());
 
             return ResponseEntity.ok(tag.get());
         } else {
             return ResponseEntity.status(404)
-                    .body(Map.of("errorMessage", String.format("Resource not found for user with id = %s    ", userId),
+                    .body(Map.of("errorMessage", "Resource not found",
                             "errorCode", "404" + resourceCode));
         }
     }

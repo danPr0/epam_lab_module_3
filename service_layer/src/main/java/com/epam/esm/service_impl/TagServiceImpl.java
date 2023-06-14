@@ -54,9 +54,9 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Optional<TagDTO> getMostPopularUserTag(long userId) {
+    public Optional<TagDTO> getMostPopularUserTag() {
 
-        return tagRepository.getMostPopularEntity(userId).map(DTOUtil::convertToDTO);
+        return tagRepository.getMostPopularEntity().map(DTOUtil::convertToDTO);
     }
 
     @Override

@@ -16,7 +16,11 @@ public interface TagRepository {
 
     Optional<Tag> getEntity(Long id);
 
-    Optional<Tag> getMostPopularEntity(Long userId);
+    /**
+     *
+     * @return the most widely used tag of a user with the highest cost of all orders
+     */
+    Optional<Tag> getMostPopularEntity();
 
     void deleteEntity(Long id);
 }

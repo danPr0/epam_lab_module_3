@@ -16,7 +16,7 @@ public interface TagService {
 
     Optional<TagDTO> getTag(long id);
 
-    Optional<TagDTO> getMostPopularUserTag(long userId);
+    Optional<TagDTO> getMostPopularUserTag();
 
     boolean deleteTag(long id);
 }

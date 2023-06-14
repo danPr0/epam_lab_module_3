@@ -72,17 +72,15 @@ public class TagServiceTest extends Mockito {
     @Test
     public void testGetMostPopularTag() {
 
-        long userId = 1;
+        when(tagRepository.getMostPopularEntity()).thenReturn(Optional.of(tag1));
 
-        when(tagRepository.getMostPopularEntity(userId)).thenReturn(Optional.of(tag1));
+        assertEquals(Optional.of(tag1DTO), tagService.getMostPopularUserTag());
+        verify(tagRepository).getMostPopularEntity();
 
-        assertEquals(Optional.of(tag1DTO), tagService.getMostPopularUserTag(tag1DTO.getId()));
-        verify(tagRepository).getMostPopularEntity(userId);
+        when(tagRepository.getMostPopularEntity()).thenReturn(Optional.empty());
 
-        when(tagRepository.getMostPopularEntity(userId)).thenReturn(Optional.empty());
-
-        assertTrue(tagService.getMostPopularUserTag(tag2DTO.getId()).isEmpty());
-        verify(tagRepository).getMostPopularEntity(userId);
+        assertTrue(tagService.getMostPopularUserTag().isEmpty());
+        verify(tagRepository, times(2)).getMostPopularEntity();
     }
 
     @Test

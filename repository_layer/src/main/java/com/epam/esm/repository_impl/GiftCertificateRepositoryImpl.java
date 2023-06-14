@@ -1,27 +1,18 @@
 package com.epam.esm.repository_impl;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.GiftCertificateRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import org.hibernate.query.sqm.TemporalUnit;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SortField;
-import org.jooq.SortOrder;
-import org.jooq.conf.ParamType;
+import jakarta.persistence.criteria.*;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.jooq.impl.DSL.*;
 
 /**
  * Implementation of DAO Interface {@link GiftCertificateRepository}.
@@ -70,43 +61,39 @@ public class GiftCertificateRepositoryImpl implements GiftCertificateRepository 
             int page, int total, Optional<List<String>> tagNames, Optional<String> namePart,
             Optional<String> descriptionPart, Optional<String> nameOrder, Optional<String> createDateOrder) {
 
-//        CriteriaBuilder                cb   = em.getCriteriaBuilder();
-//        CriteriaQuery<GiftCertificate> cq   = cb.createQuery(GiftCertificate.class);
-//        Root<GiftCertificate>          root = cq.from(GiftCertificate.class);
-//
-//        cq.select(root).where(cb.lessThan(cb.currentTimestamp(),
-//                cb.function("timestampadd", Timestamp.class, cb.literal(TemporalUnit.DAY), root.get("duration"),
-//                        root.get("createDate"))));
+        CriteriaBuilder                cb       = em.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> cq       = cb.createQuery(GiftCertificate.class);
+        Root<GiftCertificate>          cqRootGc = cq.from(GiftCertificate.class);
 
-        SelectConditionStep<Record> query = select().from(table("gift_certificates"))
-                .where("current_date() < timestampadd(day, duration, created_date)");
+        List<Predicate> predicates = new ArrayList<>();
+
         if (tagNames.isPresent()) {
             for (String tagName : tagNames.get()) {
-                query = query.andExists(
-                        select(field("gc_id")).from(table("gift_certificates_tags")).leftJoin(table("tags"))
-                                .on(field("tag_id").eq(field("tags.id")))
-                                .where(field("gift_certificates.id").eq(field("gc_id")))
-                                .and(field("tags.name").eq(tagName)));
+                Subquery<Tag>         sq       = cq.subquery(Tag.class);
+                Root<GiftCertificate> sqRootGc = sq.from(GiftCertificate.class);
+                Join<GiftCertificate, Tag> sqJoinTag = sqRootGc.join("tags", JoinType.LEFT);
+
+                predicates.add(cb.exists(sq.where(cb.and(cb.equal(cqRootGc.get("id"), sqRootGc.get("id")),
+                        cb.equal(sqJoinTag.get("name"), tagName)))));
             }
         }
 
-        if (namePart.isPresent()) {
-            query = query.and(lower(field("name", String.class)).like('%' + namePart.get().toLowerCase() + '%'));
-        }
-        if (descriptionPart.isPresent()) {
-            query = query.and(
-                    lower(field("description", String.class)).like('%' + descriptionPart.get().toLowerCase() + '%'));
-        }
+        namePart.ifPresent(s -> predicates.add(cb.like(cb.lower(cqRootGc.get("name")), '%' + s.toLowerCase() + '%')));
+        descriptionPart.ifPresent(
+                s -> predicates.add(cb.like(cb.lower(cqRootGc.get("description")), '%' + s.toLowerCase() + '%')));
 
-        List<SortField<Object>> sortFieldList = new ArrayList<>();
-        nameOrder.ifPresent(s -> sortFieldList.add(field("name").sort(SortOrder.valueOf(s.toUpperCase()))));
-        createDateOrder.ifPresent(s -> sortFieldList.add(field("created_date").sort(SortOrder.valueOf(s.toUpperCase()))));
-        sortFieldList.add(field("id").sort(SortOrder.ASC));
+        List<Order> orderList = new ArrayList<>();
+        nameOrder.ifPresent(s -> orderList.add(s.equalsIgnoreCase("desc")
+                ? cb.desc(cqRootGc.get("name"))
+                : cb.asc(cqRootGc.get("name"))));
+        createDateOrder.ifPresent(s -> orderList.add(s.equalsIgnoreCase("desc")
+                ? cb.desc(cqRootGc.get("createdDate"))
+                : cb.asc(cqRootGc.get("createdDate"))));
+        orderList.add(cb.asc(cqRootGc.get("id")));
 
-        String sql =
-                query.orderBy(sortFieldList).limit(total).offset((page - 1) * total)
-                .getSQL(ParamType.INLINED);
+        cq.where(cb.and(predicates.toArray(Predicate[]::new))).orderBy(orderList);
 
-        return em.createNativeQuery(sql, GiftCertificate.class).getResultList();
+        return em.createQuery(cq).setFirstResult((page - 1) * total).setMaxResults(total).getResultStream()
+                .filter(gc -> gc.getCreatedDate().plusDays(gc.getDuration()).isAfter(LocalDateTime.now())).toList();
     }
 }
