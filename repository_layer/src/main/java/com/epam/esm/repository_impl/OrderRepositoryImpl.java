@@ -4,9 +4,7 @@ import com.epam.esm.entity.Order;
 import com.epam.esm.repository.OrderRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.TypedQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,12 +34,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> getEntitiesByUser(Long userId) {
 
-        CriteriaBuilder      cb   = em.getCriteriaBuilder();
-        CriteriaQuery<Order> cq   = cb.createQuery(Order.class);
-        Root<Order>          root = cq.from(Order.class);
+        TypedQuery<Order> query = em.createQuery("select o from Order o where o.user.id = :userId", Order.class);
+        query.setParameter("userId", userId);
 
-        cq.select(root).where(cb.equal(root.get("user"), userId));
-
-        return em.createQuery(cq).getResultList();
+        return query.getResultList();
     }
 }

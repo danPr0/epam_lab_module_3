@@ -1,7 +1,6 @@
 package com.epam.esm.service_impl;
 
 import com.epam.esm.dto.TagDTO;
-import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
 import com.epam.esm.service.TagService;
 import com.epam.esm.util_service.DTOUtil;

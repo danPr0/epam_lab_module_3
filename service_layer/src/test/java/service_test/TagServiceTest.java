@@ -3,7 +3,6 @@ package service_test;
 import com.epam.esm.dto.TagDTO;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.repository.TagRepository;
-import com.epam.esm.repository_impl.TagRepositoryImpl;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service_impl.TagServiceImpl;
 import org.junit.jupiter.api.Test;
